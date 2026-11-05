@@ -17,6 +17,109 @@ abstract class SongRecognitionRemoteDataSource {
   Future<Song> getSongDetails({required String songId, required String source});
 }
 
+/// Adaptador del backend propio de LyricFlow.
+///
+/// El cliente nunca recibe ni usa credenciales de AudD/ACRCloud.
+class BackendSongRecognitionRemoteDataSource
+    implements SongRecognitionRemoteDataSource {
+  final ApiClient _apiClient;
+  final String _baseUrl;
+
+  BackendSongRecognitionRemoteDataSource({
+    required ApiClient apiClient,
+    required String baseUrl,
+  })  : _apiClient = apiClient,
+        _baseUrl = baseUrl.replaceFirst(RegExp(r'/$'), '');
+
+  @override
+  Future<Song> recognizeSong({
+    required List<int> audioBytes,
+    required int durationMs,
+  }) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      '$_baseUrl/api/v1/recognitions',
+      data: {
+        'audio_base64': base64Encode(audioBytes),
+        'duration_ms': durationMs,
+        'is_humming': false,
+      },
+    );
+    return _parseResponse(response.data);
+  }
+
+  @override
+  Future<Song> recognizeByHumming({required List<int> audioBytes}) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      '$_baseUrl/api/v1/recognitions',
+      data: {
+        'audio_base64': base64Encode(audioBytes),
+        'duration_ms': 5000,
+        'is_humming': true,
+      },
+    );
+    return _parseResponse(response.data);
+  }
+
+  @override
+  Future<List<Song>> searchSong({required String query}) {
+    throw UnimplementedError(
+      'Song search is not available through the backend yet.',
+    );
+  }
+
+  @override
+  Future<Song> getSongDetails({
+    required String songId,
+    required String source,
+  }) {
+    throw UnimplementedError(
+      'Song details are not available through the backend yet.',
+    );
+  }
+
+  Song _parseResponse(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw Exception('El backend devolvió una respuesta vacía.');
+    }
+
+    final status = data['status'] as String?;
+    if (status != 'recognized') {
+      throw Exception(
+        data['message'] as String? ?? 'No se pudo reconocer la canción.',
+      );
+    }
+
+    final song = data['song'];
+    if (song is! Map<String, dynamic>) {
+      throw Exception('El backend no devolvió datos de la canción.');
+    }
+
+    return Song(
+      id: song['id'] as String? ?? '',
+      title: song['title'] as String? ?? 'Desconocido',
+      artist: song['artist'] as String? ?? 'Artista desconocido',
+      album: song['album'] as String?,
+      releaseDate: _parseDate(song['release_date']),
+      isrc: song['isrc'] as String?,
+      source: song['source'] as String? ?? 'backend',
+      hasLyrics: song['has_lyrics'] as bool? ?? false,
+      externalLinks: _parseLinks(song['external_links']),
+    );
+  }
+
+  DateTime? _parseDate(Object? value) {
+    if (value is! String || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
+
+  Map<String, String> _parseLinks(Object? value) {
+    if (value is! Map) return {};
+    return value.map(
+      (key, value) => MapEntry(key.toString(), value.toString()),
+    );
+  }
+}
+
 /// Implementación usando AudD.io API
 ///
 /// AudD ofrece reconocimiento de canciones. Sin API key funciona

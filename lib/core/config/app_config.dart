@@ -38,6 +38,8 @@ class AppConfig {
   String get auddApiKey => dotenv.env['AUDD_API_KEY'] ?? '';
   String get musixmatchApiKey => dotenv.env['MUSIXMATCH_API_KEY'] ?? '';
   String get openAiApiKey => dotenv.env['OPENAI_API_KEY'] ?? '';
+  String get backendApiUrl =>
+      dotenv.env['BACKEND_API_URL'] ?? 'http://localhost:8000';
 
   // ─── API Base URLs ───
   String get musixmatchBaseUrl => 'https://api.musixmatch.com/ws/1.1';

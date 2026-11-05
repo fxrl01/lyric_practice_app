@@ -144,6 +144,13 @@ void _registerSongRecognitionDataSources() {
   sl.registerLazySingleton<SongRecognitionRemoteDataSource>(() {
     final config = AppConfig.instance;
 
+    if (config.backendApiUrl.isNotEmpty) {
+      return BackendSongRecognitionRemoteDataSource(
+        apiClient: sl<ApiClient>(),
+        baseUrl: config.backendApiUrl,
+      );
+    }
+
     if (config.acrCloudAccessKey.isNotEmpty) {
       return AcrCloudRemoteDataSource(
         apiClient: sl<ApiClient>(),

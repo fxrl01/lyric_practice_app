@@ -176,10 +176,15 @@ void _registerSongRecognitionDataSources() {
 // ─── Lyrics Data Sources ───
 void _registerLyricsDataSources() {
   sl.registerLazySingleton<LyricsRemoteDataSource>(
-    () => MusixmatchRemoteDataSource(
-      apiClient: sl<ApiClient>(),
-      apiKey: AppConfig.instance.musixmatchApiKey,
-    ),
+    () => AppConfig.instance.backendApiUrl.isNotEmpty
+        ? BackendLyricsRemoteDataSource(
+            apiClient: sl<ApiClient>(),
+            baseUrl: AppConfig.instance.backendApiUrl,
+          )
+        : MusixmatchRemoteDataSource(
+            apiClient: sl<ApiClient>(),
+            apiKey: AppConfig.instance.musixmatchApiKey,
+          ),
   );
 }
 

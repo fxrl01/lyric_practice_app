@@ -16,6 +16,7 @@ las integraciones estén implementadas todavía.
   backend/frontend recomendado, datos y fases de evolución.
 - [Modelo C4](./c4/README.md): contexto, contenedores, componentes y despliegue.
 - [Backend](../backend/README.md): ejecución y validación del backend modular.
+- [SDD](./sdd/README.md): proceso de especificaciones, criterios y verificación.
 
 ## Cómo usar estos documentos
 
@@ -26,3 +27,5 @@ las integraciones estén implementadas todavía.
    nuevo ADR.
 4. Actualizar esta documentación cuando la implementación se desvíe
    intencionalmente del diseño.
+5. Para cambios de comportamiento, crear o actualizar una spec en
+   [`specs/`](./specs/) antes de implementar.

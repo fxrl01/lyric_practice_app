@@ -26,6 +26,78 @@ abstract class LyricsRemoteDataSource {
   });
 }
 
+/// Adaptador de letras a través del backend propio.
+class BackendLyricsRemoteDataSource implements LyricsRemoteDataSource {
+  final ApiClient _apiClient;
+  final String _baseUrl;
+
+  BackendLyricsRemoteDataSource({
+    required ApiClient apiClient,
+    required String baseUrl,
+  })  : _apiClient = apiClient,
+        _baseUrl = baseUrl.replaceFirst(RegExp(r'/$'), '');
+
+  @override
+  Future<Lyrics> getLyrics({
+    required String songTitle,
+    required String artist,
+    String? isrc,
+    int? duration,
+  }) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      '$_baseUrl/api/v1/lyrics',
+      queryParameters: {'title': songTitle, 'artist': artist},
+    );
+    return _parse(response.data);
+  }
+
+  @override
+  Future<Lyrics> getSyncedLyrics({
+    required String songTitle,
+    required String artist,
+    String? isrc,
+  }) {
+    return getLyrics(songTitle: songTitle, artist: artist, isrc: isrc);
+  }
+
+  @override
+  Future<List<Lyrics>> searchByLyricText({required String query}) {
+    throw UnimplementedError(
+      'Lyric text search is not available through the backend yet.',
+    );
+  }
+
+  @override
+  Future<bool> hasLyrics({
+    required String songTitle,
+    required String artist,
+  }) async {
+    try {
+      await getLyrics(songTitle: songTitle, artist: artist);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Lyrics _parse(Map<String, dynamic>? data) {
+    if (data == null || data['lines'] is! List) {
+      throw Exception('El backend devolvió letras inválidas.');
+    }
+    final lines = (data['lines'] as List)
+        .whereType<String>()
+        .map((text) => LyricLine(text: text))
+        .toList();
+    return Lyrics(
+      songId: data['song_id'] as String? ?? '',
+      lines: lines,
+      language: data['language'] as String? ?? 'unknown',
+      source: LyricsSource.userContributed,
+      attribution: data['attribution'] as String?,
+    );
+  }
+}
+
 /// Implementación usando lyrics.ovh + Musixmatch como fallback
 ///
 /// lyrics.ovh es 100% gratis, sin API key, sin registro.

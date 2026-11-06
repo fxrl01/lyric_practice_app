@@ -32,3 +32,10 @@ class RecognitionResponse(BaseModel):
     status: Literal["not_configured", "recognized", "not_found", "failed"]
     message: str
     song: dict[str, object] | None = None
+
+
+class RecognitionHistoryResponse(BaseModel):
+    items: list[dict[str, object]]
+    limit: int
+    offset: int
+    total: int

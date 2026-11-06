@@ -10,8 +10,8 @@
 | Configuración | `flutter_dotenv` | No es seguro para secretos de producción |
 | Persistencia | `shared_preferences` | Cache e historial local; no es una base de datos |
 | Backend | FastAPI scaffold en `backend/` | Aún sin proveedor externo ni base de datos |
-| Base de datos | Ninguna remota | No existe Postgres, SQLite ni servidor propio |
-| Proveedores | AudD/ACRCloud, letras, OpenAI/Google previstos | Algunos adaptadores todavía son demo |
+| Base de datos | SQLAlchemy preparado con SQLite local | PostgreSQL será la fuente de verdad en producción |
+| Proveedores | AudD/ACRCloud, lyrics.ovh, OpenAI/Google previstos | Reconocimiento depende de credencial; letras ya tienen adaptador backend |
 | Procesamiento pesado | No implementado | Stems y MIDI solo tienen contratos preliminares |
 | Testing | `flutter_test`, Mocktail | Predominan pruebas unitarias; faltan contratos e integración |
 
@@ -59,6 +59,14 @@ La primera implementación está en [`backend/`](../backend/). Incluye
 configuración tipada, health/readiness, contratos de reconocimiento y un
 adaptador AudD detrás de `SongRecognitionPort`. Si la clave no está configurada,
 responde `not_configured` y nunca simula resultados.
+
+La persistencia inicial ya define las tablas `songs` y `recognitions` con
+SQLAlchemy y Alembic. SQLite se usa para desarrollo; PostgreSQL se configurará
+mediante `DATABASE_URL` antes de producción.
+
+El backend también habilita CORS para los orígenes locales definidos en
+`APP_ALLOWED_ORIGINS`, necesario cuando Flutter Web y FastAPI usan puertos
+distintos.
 
 FastAPI/Python es especialmente conveniente para transcripción, separación de
 stems y MIDI por su ecosistema de audio/ML. El worker debe ser un proceso

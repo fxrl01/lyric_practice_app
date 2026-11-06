@@ -8,7 +8,8 @@ class Settings(BaseSettings):
     app_env: str = "development"
     app_debug: bool = False
     app_api_prefix: str = "/api/v1"
-    app_allowed_origins: list[str] = []
+    app_allowed_origins: str = ""
+    database_url: str = "sqlite+aiosqlite:///./lyricflow.db"
     recognition_provider: str = ""
     recognition_timeout_seconds: float = 20.0
     audd_api_key: str = ""

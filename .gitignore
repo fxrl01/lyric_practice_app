@@ -53,3 +53,4 @@ backend/**/__pycache__/
 backend/.pytest_cache/
 backend/.ruff_cache/
 backend/src/*.egg-info/
+backend/*.db

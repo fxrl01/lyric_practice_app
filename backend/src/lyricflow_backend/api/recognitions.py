@@ -1,9 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from lyricflow_backend.api.schemas.recognitions import (
     RecognitionCapabilitiesResponse,
+    RecognitionHistoryResponse,
     RecognitionRequest,
     RecognitionResponse,
 )
@@ -11,11 +12,33 @@ from lyricflow_backend.application.recognize_song import (
     RecognizeSong,
     get_recognize_song,
 )
+from lyricflow_backend.domain.recognition_repository import RecognitionRepository
 from lyricflow_backend.infrastructure.recognition import (
     RecognitionConfigurationError,
 )
+from lyricflow_backend.infrastructure.recognition_repository import (
+    get_recognition_repository,
+)
 
 router = APIRouter(prefix="/recognitions", tags=["recognitions"])
+
+
+@router.get("/history", response_model=RecognitionHistoryResponse)
+async def history(
+    repository: Annotated[
+        RecognitionRepository,
+        Depends(get_recognition_repository),
+    ],
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> RecognitionHistoryResponse:
+    items, total = await repository.history(limit=limit, offset=offset)
+    return RecognitionHistoryResponse(
+        items=items,
+        limit=limit,
+        offset=offset,
+        total=total,
+    )
 
 
 @router.get(

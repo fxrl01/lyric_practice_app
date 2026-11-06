@@ -177,6 +177,16 @@ cliente en un contenedor de lógica de proveedores.
 6. Añadir pruebas de contrato para cada adaptador.
 7. Mover secretos y proveedores al backend antes de publicar producción.
 
+El módulo de letras ya usa el backend como frontera: `lyrics.ovh` se consume
+desde `infrastructure`, se normaliza en una respuesta propia y Flutter recibe
+solo el contrato de letras. El contenido se mantiene como pass-through y no se
+persiste.
+
+El módulo de reconocimiento también persiste la canción normalizada y el
+intento de reconocimiento mediante un repositorio SQLAlchemy. La entidad de
+dominio no conoce SQLAlchemy; la implementación queda en
+`infrastructure`.
+
 ## Criterios de aceptación arquitectónica
 
 - Ninguna entidad de dominio importa Flutter o un proveedor.

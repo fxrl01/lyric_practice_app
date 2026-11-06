@@ -17,6 +17,7 @@ de integración hexagonales. La documentación está en [`docs/`](./docs/):
 - [`design-analysis.md`](./docs/design-analysis.md)
 - [`architecture.md`](./docs/architecture.md)
 - [`adr/0001-modular-monolith.md`](./docs/adr/0001-modular-monolith.md)
+- [`sdd/README.md`](./docs/sdd/README.md)
 
 ## Desarrollo local
 
@@ -31,3 +32,9 @@ de integración hexagonales. La documentación está en [`docs/`](./docs/):
    ```
 
 No publiques `.env`: las credenciales deben mantenerse fuera del repositorio.
+
+## Proceso de desarrollo
+
+Los cambios funcionales se trabajan con Specification-Driven Development
+(SDD): primero se define una spec verificable, después se implementa y se
+validan sus criterios de aceptación.
